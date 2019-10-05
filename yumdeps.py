@@ -37,7 +37,8 @@ KEY_DEP_LIST = [KEY_PACKAGE, KEY_DEPENDENCY, KEY_PROVIDER]
 UNDEFINED = 'undefined'
 
 # String used to flag internal packages and dependencies
-INTERNAL = '[internal]'
+INTERNAL = 'internal'
+EXTERNAL = 'external'
 
 # Output options
 OUT_TEXT = 'text'
@@ -610,7 +611,7 @@ def output_wiki(dep, print_all):
     """
     # Header
     print('{| class="wikitable"')
-    print('! # || Package || Version|| Repository || Dependency || Provider || Version')
+    print('! # || Package || Version|| Repository || Dependency || Provider || Version || Repository')
     print('|-')
 
     # Compute the number of rows per package.
@@ -643,6 +644,7 @@ def output_wiki(dep, print_all):
             print('| ---')
             print('| ---')
             print('| ---')
+            print('| ---')
             print('|-')
             continue
 
@@ -653,12 +655,16 @@ def output_wiki(dep, print_all):
         for dep_name in dep_list:
             print('| rowspan="' + str(dep.provider_count(pkg_name, dep_name)) + '" | ' + dep_name)
             for p_name, p_version in dep.get_provider_list(pkg_name, dep_name):
+                try:
+                    p_repository = dep.get_repository(p_name)
+                except ValueError:
+                    p_repository = ''
                 if dep.internal_package(p_name):
                     p_name = '[[#' + p_name + '|' + p_name + ']]'
                 print('| ' + p_name)
                 print('| ' + p_version)
+                print('| ' + p_repository)
                 print('|-')
-
     print('|}')
 
 
@@ -675,7 +681,7 @@ def get_args(argv):
                         action='store',
                         dest='output',
                         choices=[OUT_TEXT, OUT_CSV, OUT_WIKI],
-                        default=OUT_CSV,
+                        default=OUT_WIKI,
                         help='Output format default=(' + OUT_TEXT + ')')
 
     parser.add_argument('-a', '--all',
