@@ -504,6 +504,24 @@ def get_dep_list(dep, pkg_name, include_all):
     return d_list
 
 
+def get_provider_repository(dep, name):
+    """
+    Auxiliary routine that returns the provider repository.
+    It'll return an empty string or blank if the provider is not an internal package.
+    Privided to prevent code duplication.
+    :param dep: package/dependency object
+    :type dep: PkgDep
+    :param name: provider name
+    :type name: str
+    :return: provider repository
+    """
+    try:
+        repository = dep.get_repository(name)
+    except ValueError:
+        repository = ''
+    return repository
+
+
 def output_text(dep, print_all):
     """
     Print package dependencies in plain text format. This is very similar to the output
@@ -511,7 +529,7 @@ def output_text(dep, print_all):
     filtered out.
     :param dep: package/dependency object
     :type dep: PkgDep
-    :param print_all: dependencies
+    :param print_all: output all dependencies
     :type print_all: bool
     :return: None
     """
@@ -538,38 +556,88 @@ def output_text(dep, print_all):
                 print(' ' * 4 + '[' + p_name + ', ' + p_version + ']' + flag)
 
 
+# def output_csv(dep, print_all):
+#     """
+#     Print package dependencies in plain csv format, one dependency per line.
+#     Non internal dependencies are filtered out.
+#     :param dep: package/dependency object
+#     :type dep: PkgDep
+#     :param print_all: dependencies
+#     :type print_all: bool
+#     :return: None
+#     """
+#     print('Package name,Version,Release,Architecture,Repository,Summary,Dependency,Providers... (*) internal provider')
+#     for pkg_name in sorted(dep.pkg):
+#         pkg_line = '{},{},{},{},{},{}'.format(pkg_name,
+#                                               dep.get_version(pkg_name),
+#                                               dep.get_release(pkg_name),
+#                                               dep.get_arch(pkg_name),
+#                                               dep.get_repository(pkg_name),
+#                                               dep.get_summary(pkg_name).replace(',', ' '))
+#
+#         # Get the (effective) dependency list for the current package
+#         dep_list = get_dep_list(dep, pkg_name, print_all)
+#         if len(dep_list) == 0:
+#             print(pkg_line + ',---')
+#             continue
+#
+#         # Print dependency and provider information
+#         for dep_name in dep_list:
+#             line = pkg_line + ',' + dep_name
+#             for p_name, p_version in dep.get_provider_list(pkg_name, dep_name):
+#                 flag = ',(*)' if dep.internal_package(p_name) else ','
+#                 line += ',' + p_name + ',' + p_version + flag
+#             print(line)
+
+
 def output_csv(dep, print_all):
     """
     Print package dependencies in plain csv format, one dependency per line.
-    Non internal dependencies are filtered out.
+    CSV ouput is intended to be used in combination with filters in a spreadsheet.
     :param dep: package/dependency object
     :type dep: PkgDep
-    :param print_all: dependencies
+    :param print_all: output all dependencies
     :type print_all: bool
     :return: None
     """
-    print('Package name,Version,Release,Architecture,Repository,Summary,Dependency,Providers... (*) internal provider')
+
+    # Header
+    print(
+        'Package,Version,Release,Architecture,Repository,Dependency,Provider,Version,Architecture,Repository,Internal,Summary')
+
     for pkg_name in sorted(dep.pkg):
-        pkg_line = '{},{},{},{},{},{}'.format(pkg_name,
-                                              dep.get_version(pkg_name),
-                                              dep.get_release(pkg_name),
-                                              dep.get_arch(pkg_name),
-                                              dep.get_repository(pkg_name),
-                                              dep.get_summary(pkg_name).replace(',', ' '))
+        line_head = '{},{},{},{},{}'.format(pkg_name,
+                                            dep.get_version(pkg_name),
+                                            dep.get_release(pkg_name),
+                                            dep.get_arch(pkg_name),
+                                            dep.get_repository(pkg_name))
+
+        pkg_summary = dep.get_summary(pkg_name).replace(',', ' ')
 
         # Get the (effective) dependency list for the current package
         dep_list = get_dep_list(dep, pkg_name, print_all)
         if len(dep_list) == 0:
-            print(pkg_line + ',---')
+            output_line = line_head + ',--,--,--,--,--,--' + ',' + pkg_summary
+            print(output_line)
             continue
 
         # Print dependency and provider information
         for dep_name in dep_list:
-            line = pkg_line + ',' + dep_name
+            # output_line = line_head + ',' + dep_name
             for p_name, p_version in dep.get_provider_list(pkg_name, dep_name):
-                flag = ',(*)' if dep.internal_package(p_name) else ','
-                line += ',' + p_name + ',' + p_version + flag
-            print(line)
+                try:
+                    p_repository = dep.get_repository(p_name)
+                    p_arch = dep.get_arch(p_name)
+                    p_flag = 'yes'
+                except ValueError:
+                    p_repository = ''
+                    p_arch = ''
+                    p_flag = 'no'
+                # flag = 'yes' if dep.internal_package(p_name) else 'no'
+                output_line = line_head + ',' + dep_name + \
+                              ',' + p_name + ',' + p_version + ',' + p_arch + ',' + p_repository + ',' + p_flag + \
+                              ',' + pkg_summary
+                print(output_line)
 
 
 def output_wiki(dep, print_all):
@@ -578,7 +646,7 @@ def output_wiki(dep, print_all):
     Non internal dependencies are filtered out.
     :param dep: package/dependency object
     :type dep: PkgDep
-    :param print_all: dependencies
+    :param print_all: output all dependencies
     :type print_all: bool
     :return: None
     """
@@ -654,7 +722,7 @@ def get_args(argv):
                         action='store',
                         dest='output',
                         choices=[OUT_TEXT, OUT_CSV, OUT_WIKI],
-                        default=OUT_WIKI,
+                        default=OUT_CSV,
                         help='Output format default=(' + OUT_TEXT + ')')
 
     parser.add_argument('-a', '--all',
