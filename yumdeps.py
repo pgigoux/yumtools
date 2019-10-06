@@ -556,40 +556,6 @@ def output_text(dep, print_all):
                 print(' ' * 4 + '[' + p_name + ', ' + p_version + ']' + flag)
 
 
-# def output_csv(dep, print_all):
-#     """
-#     Print package dependencies in plain csv format, one dependency per line.
-#     Non internal dependencies are filtered out.
-#     :param dep: package/dependency object
-#     :type dep: PkgDep
-#     :param print_all: dependencies
-#     :type print_all: bool
-#     :return: None
-#     """
-#     print('Package name,Version,Release,Architecture,Repository,Summary,Dependency,Providers... (*) internal provider')
-#     for pkg_name in sorted(dep.pkg):
-#         pkg_line = '{},{},{},{},{},{}'.format(pkg_name,
-#                                               dep.get_version(pkg_name),
-#                                               dep.get_release(pkg_name),
-#                                               dep.get_arch(pkg_name),
-#                                               dep.get_repository(pkg_name),
-#                                               dep.get_summary(pkg_name).replace(',', ' '))
-#
-#         # Get the (effective) dependency list for the current package
-#         dep_list = get_dep_list(dep, pkg_name, print_all)
-#         if len(dep_list) == 0:
-#             print(pkg_line + ',---')
-#             continue
-#
-#         # Print dependency and provider information
-#         for dep_name in dep_list:
-#             line = pkg_line + ',' + dep_name
-#             for p_name, p_version in dep.get_provider_list(pkg_name, dep_name):
-#                 flag = ',(*)' if dep.internal_package(p_name) else ','
-#                 line += ',' + p_name + ',' + p_version + flag
-#             print(line)
-
-
 def output_csv(dep, print_all):
     """
     Print package dependencies in plain csv format, one dependency per line.
