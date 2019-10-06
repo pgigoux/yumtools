@@ -688,7 +688,7 @@ def get_args(argv):
                         action='store',
                         dest='output',
                         choices=[OUT_TEXT, OUT_CSV, OUT_WIKI],
-                        default=OUT_CSV,
+                        default=OUT_TEXT,
                         help='Output format default=(' + OUT_TEXT + ')')
 
     parser.add_argument('-a', '--all',
