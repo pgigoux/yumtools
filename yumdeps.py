@@ -504,33 +504,6 @@ def get_dep_list(dep, pkg_name, include_all):
     return d_list
 
 
-# def output_text(dep, print_all):
-#     """
-#     Print package dependencies in plain text format. This is very similar to the output
-#     from print_packages_and_dependencies, but here not internal dependencies are
-#     filtered out.
-#     :param dep: package/dependency object
-#     :type dep: PkgDep
-#     :param print_all: dependencies
-#     :type print_all: bool
-#     :return: None
-#     """
-#     for pkg_name in sorted(dep.pkg):
-#         print 'Package {} [{}] [{}] [{}] [{}] [{}]'.format(pkg_name,
-#                                                            dep.get_version(pkg_name),
-#                                                            dep.get_release(pkg_name),
-#                                                            dep.get_arch(pkg_name),
-#                                                            dep.get_repository(pkg_name),
-#                                                            dep.get_summary(pkg_name))
-#         for dep_name in dep.get_dependency_list(pkg_name):
-#             if not print_all and not dep.internal_dependency(pkg_name, dep_name):
-#                 continue
-#             print ' ' * 2 + dep_name
-#             for p_name, p_version in dep.get_provider_list(pkg_name, dep_name):
-#                 flag = ' ' + INTERNAL if dep.internal_package(p_name) else ''
-#                 print ' ' * 4 + '[' + p_name + ', ' + p_version + ']' + flag
-
-
 def output_text(dep, print_all):
     """
     Print package dependencies in plain text format. This is very similar to the output
