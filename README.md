@@ -8,3 +8,19 @@ not have a documented and stable API to interact with yum repositories from Pyth
 from python created import problems with yum, which is in turn written in Python. The cleaner solution was to
 use a shell script to gather all the data from the yum repositories and a Python program to process and format
 the output.
+
+For example, to generate the list of dependencies of the packages in the repositories 'myrepo-production'
+and 'myrepo-testing' type:
+
+./yumdeps.csh myrepo-production myrepo-testing
+
+This will generate three files: pkg.lsit (list of packages), pkg.info (package information) and
+pkg.dep (package dependencies).
+
+Then yumdeps.py can be used to generate the output in text, csv and mediawii formats.
+
+./yumdeps.py -o text
+./yumdeps.py -o csv
+./yumdeps.py -o wiki
+
+The csv output is intended to be used in combination with spreadsheet filters.
